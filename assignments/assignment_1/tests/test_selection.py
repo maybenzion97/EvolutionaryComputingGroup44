@@ -6,14 +6,14 @@ from ariel.ec import Individual
 from selection import lexicase, tournament
 
 
-def body(fitness, dists):
+def body(fitness: float, dists: list[float]) -> Individual:
     ind = Individual()
     ind.fitness = fitness
     ind.tags = {"dists": dists}
     return ind
 
 
-def example_bodies():
+def example_bodies() -> dict[str, Individual]:
     return {
         "A": body(12.41, [9, 10, 11, 12, 13]),
         "B": body(16.27, [5, 8, 12, 15, 18]),

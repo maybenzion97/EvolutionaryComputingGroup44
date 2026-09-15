@@ -70,6 +70,7 @@ def run_random_search(
         )
         history.write(row)
     history.close()
+    assert best is not None and best_genotype is not None
 
     best_body = {
         "fitness": best.fitness,

@@ -16,5 +16,13 @@
     "reportUnknownVariableType": false,
     "reportUnknownArgumentType": false, // + PIL
     // -------------------------------------------------------------------- //
-    "reportUnknownLambdaType": false
+    "reportUnknownLambdaType": false,
+    // Assignment 1: the scripts import each other as top-level modules (e.g.
+    // `from problem import ...`), and pandas/scipy have no type stubs.
+    "executionEnvironments": [
+        {
+            "root": "assignments/assignment_1",
+            "reportMissingTypeStubs": false
+        }
+    ]
 }

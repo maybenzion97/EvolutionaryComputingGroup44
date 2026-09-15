@@ -59,7 +59,7 @@ def main() -> None:
             seed=seed,
             generations=args.generations,
             out_dir=out_root / f"seed_{seed}",
-            overwrite=True,  
+            overwrite=True,
         )
         run_experiment(cfg, extra_steps=[measure])
 

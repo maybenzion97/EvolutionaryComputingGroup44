@@ -2,9 +2,8 @@
 
 import random
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import Literal, NamedTuple, TypeVar
 
-import networkx as nx
 import numpy as np
 
 from ariel.body_phenotypes.robogen_lite.decoders._blueprint import load_graph_from_json
@@ -14,9 +13,7 @@ from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 from tree_edit_distance import tree_edit_distance
 
 TARGET_DIR = Path(__file__).parent / "target_bodies"
-TARGETS: list[nx.DiGraph] = [
-    load_graph_from_json(path) for path in sorted(TARGET_DIR.glob("*.json"))
-]
+TARGETS = [load_graph_from_json(path) for path in sorted(TARGET_DIR.glob("*.json"))]
 TARGET_SIZES = [target.number_of_nodes() for target in TARGETS]  # 7, 11, 15, 19, 25
 
 MAX_MODULES = 20  # not counting the core
@@ -25,6 +22,7 @@ MAX_NODES = MAX_MODULES + 1
 DIVERSITY_SAMPLE = 20  # bodies used to estimate population diversity
 
 InitSize = Literal["uniform", "full"]
+T = TypeVar("T")
 
 
 class Evaluation(NamedTuple):
@@ -81,5 +79,5 @@ def diversity_rng(seed: int) -> random.Random:
     return random.Random(10_000 + seed)
 
 
-def sample_for_diversity(items: list, rng: random.Random) -> list:
+def sample_for_diversity(items: list[T], rng: random.Random) -> list[T]:
     return rng.sample(items, min(DIVERSITY_SAMPLE, len(items)))

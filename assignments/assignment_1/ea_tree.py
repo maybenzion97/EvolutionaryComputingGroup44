@@ -11,13 +11,13 @@ Usage (from the repository root):
 Results are written to results/<condition>/seed_XX/.
 """
 
-
 import argparse
 import copy
 import random
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any, cast
 
 from ariel.ec import EA, EAOperation, Individual, Population
 from ariel.ec.genotypes.tree.operators import (
@@ -99,7 +99,10 @@ def copy_genome(ind: Individual) -> TreeGenome:
 
 
 def evaluation_of(ind: Individual) -> Evaluation:
-    return Evaluation(ind.fitness, ind.tags["dists"], ind.tags["size"])
+    # ariel types tags as generic JSON; evaluate() stores these two entries
+    dists = cast("list[float]", ind.tags["dists"])
+    size = cast("int", ind.tags["size"])
+    return Evaluation(ind.fitness, dists, size)
 
 
 def record(individuals: list[Individual], run: RunState) -> None:
@@ -182,11 +185,12 @@ def log_generation(population: Population, run: RunState) -> Population:
     return population
 
 
-def describe(ind: Individual) -> dict:
+def describe(ind: Individual) -> dict[str, Any]:
+    result = evaluation_of(ind)
     return {
-        "fitness": ind.fitness,
-        "size": ind.tags["size"],
-        "dists": dict(zip(TARGET_SIZES, ind.tags["dists"])),
+        "fitness": result.fitness,
+        "size": result.size,
+        "dists": dict(zip(TARGET_SIZES, result.dists)),
         "genotype": ind.genotype,
     }
 
@@ -196,15 +200,15 @@ def save_final(individuals: list[Individual], out: Path) -> None:
     best = min(individuals, key=lambda ind: ind.fitness)
     save_json(out / "best_body.json", describe(best))
 
-    specialists = {}
+    specialists: dict[str, Any] = {}
     for j, size in enumerate(TARGET_SIZES):
-        closest = min(individuals, key=lambda ind: ind.tags["dists"][j])
+        closest = min(individuals, key=lambda ind: evaluation_of(ind).dists[j])
         specialists[f"target_{size}"] = describe(closest)
     save_json(out / "specialists.json", specialists)
 
 
 def run_experiment(
-    cfg: RunConfig, extra_steps: list[EAOperation] | None = None
+    cfg: RunConfig, extra_steps: list[EAOperation[...]] | None = None
 ) -> Path:
     """Run one EA and return its output folder.
 

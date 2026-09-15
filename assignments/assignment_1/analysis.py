@@ -16,11 +16,14 @@ Usage (from the repository root):
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, cast
 
 import matplotlib as mpl
 
-mpl.use("Agg")  
+mpl.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 import numpy as np
 import pandas as pd
 from scipy.stats import mannwhitneyu
@@ -44,7 +47,7 @@ MARKERS = {
     "other": "v",
 }
 ROLE_ORDER = ["baseline", "lexicase", "control", "random", "other"]
-COLUMN_WIDTH = 3.33  
+COLUMN_WIDTH = 3.33
 
 
 @dataclass
@@ -52,7 +55,7 @@ class Condition:
     name: str
     role: str
     label: str
-    short_label: str 
+    short_label: str
 
     @property
     def color(self) -> str:
@@ -71,7 +74,7 @@ def find_conditions(data: pd.DataFrame, control: str | None) -> list[Condition]:
     """
     runs = data.drop_duplicates("condition").set_index("condition")
     tournaments = runs[runs["selection"] == "tournament"]
-    larger = [name for name, row in tournaments.iterrows() if row["k"] != 2]
+    larger = [str(name) for name, row in tournaments.iterrows() if row["k"] != 2]
     if control is None:
         if len(larger) > 1:
             raise SystemExit(
@@ -109,7 +112,7 @@ def find_conditions(data: pd.DataFrame, control: str | None) -> list[Condition]:
 
 def final_generation(data: pd.DataFrame) -> pd.DataFrame:
     last = data.groupby(["condition", "seed"])["generation"].transform("max")
-    return data[data["generation"] == last]
+    return cast(pd.DataFrame, data[data["generation"] == last])
 
 
 # --- figures ---
@@ -136,18 +139,18 @@ def set_plot_style() -> None:
             "lines.linewidth": 1.5,
             "legend.frameon": False,
             "savefig.bbox": "tight",
-            "pdf.fonttype": 42,  
+            "pdf.fonttype": 42,
         }
     )
 
 
-def save(fig, figures: Path, name: str) -> None:
+def save(fig: Figure, figures: Path, name: str) -> None:
     fig.savefig(figures / f"{name}.pdf")
     fig.savefig(figures / f"{name}.png", dpi=200)
     plt.close(fig)
 
 
-def legend_above(ax) -> None:
+def legend_above(ax: Axes) -> None:
     ax.legend(
         loc="lower left",
         bbox_to_anchor=(0, 1.02),
@@ -159,7 +162,7 @@ def legend_above(ax) -> None:
 
 
 def plot_mean_and_std(
-    ax, data: pd.DataFrame, x: str, y: str, conditions: list[Condition]
+    ax: Axes, data: pd.DataFrame, x: str, y: str, conditions: list[Condition]
 ) -> None:
     for condition in conditions:
         per_x = data[data["condition"] == condition.name].groupby(x)[y]
@@ -298,7 +301,7 @@ def holm(p_values: list[float]) -> list[float]:
 
 def compare(
     final: pd.DataFrame, hypothesis: str, metric: str, a: str, b: str
-) -> dict | None:
+) -> dict[str, Any] | None:
     x = final[final["condition"] == a][metric].to_numpy(dtype=float)
     y = final[final["condition"] == b][metric].to_numpy(dtype=float)
     if len(x) < 2 or len(y) < 2:
@@ -367,7 +370,9 @@ def summarise(
 ) -> pd.DataFrame:
     columns = ["best_fitness", "best_size", "mean_size", "diversity"]
     columns += [f"closest_{size}" for size in TARGET_SIZES]
-    summary = final.groupby("condition")[columns].agg(["mean", "std"])
+    summary = cast(
+        pd.DataFrame, final.groupby("condition")[columns].agg(["mean", "std"])
+    )
     summary[("distinct_parents_over_run", "mean")] = data.groupby("condition")[
         "distinct_parents"
     ].mean()

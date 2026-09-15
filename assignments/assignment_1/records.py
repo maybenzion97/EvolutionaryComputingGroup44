@@ -3,6 +3,7 @@
 import csv
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -38,7 +39,7 @@ def generation_row(
     distinct_parents: int | None = None,
     parent_picks: int | None = None,
     best: Evaluation | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """One CSV row for a population.
 
     `best` replaces the population's best body (random search reports the best
@@ -50,7 +51,7 @@ def generation_row(
     if best is None:
         best = population[int(np.argmin(fitness))]
 
-    row = {
+    row: dict[str, Any] = {
         "generation": generation,
         "evaluations": evaluations,
         "population_size": len(population),
@@ -78,7 +79,7 @@ class HistoryWriter:
         self.writer = csv.DictWriter(self.file, fieldnames=HISTORY_COLUMNS)
         self.writer.writeheader()
 
-    def write(self, row: dict) -> None:
+    def write(self, row: dict[str, Any]) -> None:
         self.writer.writerow(row)
         self.file.flush()
 
@@ -91,7 +92,7 @@ def ensure_fresh(out: Path, overwrite: bool) -> None:
         raise SystemExit(f"{out} already has results (use --out-dir or --overwrite)")
 
 
-def save_json(path: Path, data: dict) -> None:
+def save_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
 
@@ -129,7 +130,7 @@ def check_consistent(data: pd.DataFrame) -> None:
     )
     shapes = runs.value_counts()
     if len(shapes) > 1:
-        generations, pop_size = shapes.idxmax()
+        generations, pop_size = cast("tuple[int, int]", shapes.idxmax())
         odd = runs[
             (runs["generations"] != generations) | (runs["pop_size"] != pop_size)
         ]

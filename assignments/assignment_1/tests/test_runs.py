@@ -2,6 +2,7 @@
 
 import csv
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -13,13 +14,13 @@ POP = 20
 GENERATIONS = 5
 
 
-def read_history(folder):
+def read_history(folder: Path) -> list[dict[str, str]]:
     with (folder / "history.csv").open(encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
 @pytest.fixture(scope="module")
-def results(tmp_path_factory):
+def results(tmp_path_factory: pytest.TempPathFactory) -> Path:
     root = tmp_path_factory.mktemp("results")
     for selection in ["tournament", "lexicase"]:
         cfg = RunConfig(
@@ -37,7 +38,7 @@ def results(tmp_path_factory):
 
 
 @pytest.mark.parametrize("condition", ["tournament_k2", "lexicase"])
-def test_ea_run(results, condition):
+def test_ea_run(results: Path, condition: str):
     folder = results / condition / "seed_00"
     rows = read_history(folder)
     best = [float(row["best_fitness"]) for row in rows]
@@ -52,14 +53,14 @@ def test_ea_run(results, condition):
         assert 0 < int(row["distinct_parents"]) <= POP <= int(row["parent_picks"])
 
 
-def test_random_search_has_the_same_budget(results):
+def test_random_search_has_the_same_budget(results: Path):
     rows = read_history(results / "random" / "seed_00")
     best = [float(row["best_fitness"]) for row in rows]
     assert int(rows[-1]["evaluations"]) == (GENERATIONS + 1) * POP
     assert best == sorted(best, reverse=True)
 
 
-def test_same_seed_gives_the_same_history(tmp_path):
+def test_same_seed_gives_the_same_history(tmp_path: Path):
     folders = []
     for i in range(2):
         cfg = RunConfig(
@@ -75,7 +76,7 @@ def test_same_seed_gives_the_same_history(tmp_path):
     ).read_text()
 
 
-def test_existing_results_are_not_overwritten(results):
+def test_existing_results_are_not_overwritten(results: Path):
     cfg = RunConfig(selection="lexicase", seed=0, pop_size=POP, generations=GENERATIONS)
     cfg.out_dir = results / "lexicase" / "seed_00"
     with pytest.raises(SystemExit):
@@ -89,7 +90,7 @@ def test_existing_results_are_not_overwritten(results):
         )
 
 
-def test_overwrite_replaces_a_run(tmp_path):
+def test_overwrite_replaces_a_run(tmp_path: Path):
     cfg = RunConfig(
         selection="lexicase",
         seed=3,
@@ -103,7 +104,7 @@ def test_overwrite_replaces_a_run(tmp_path):
     assert (tmp_path / "run" / "history.csv").exists()
 
 
-def test_analysis_rejects_a_shorter_run(results, tmp_path):
+def test_analysis_rejects_a_shorter_run(results: Path, tmp_path: Path):
     check_consistent(load_histories(results))  # all runs have the same size
 
     mixed = tmp_path / "results"

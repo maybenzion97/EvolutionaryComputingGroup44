@@ -7,10 +7,16 @@ individual's tags.
 
 import random
 from collections.abc import Callable, Sequence
+from typing import cast
 
 from ariel.ec import Individual
 
 Selector = Callable[[list[Individual]], Individual]
+
+
+def distances(ind: Individual) -> list[float]:
+    # ariel types tags as generic JSON; the EA stores the distances under "dists"
+    return cast("list[float]", ind.tags["dists"])
 
 
 def tournament(parents: list[Individual], k: int = 2) -> Individual:
@@ -26,14 +32,14 @@ def lexicase(
 
     `order` fixes the order of the targets; the tests use it.
     """
-    n_targets = len(parents[0].tags["dists"])
+    n_targets = len(distances(parents[0]))
     if order is None:
         order = random.sample(range(n_targets), n_targets)
 
     candidates = parents
     for target in order:
-        best = min(ind.tags["dists"][target] for ind in candidates)
-        candidates = [ind for ind in candidates if ind.tags["dists"][target] == best]
+        best = min(distances(ind)[target] for ind in candidates)
+        candidates = [ind for ind in candidates if distances(ind)[target] == best]
         if len(candidates) == 1:
             break
     return random.choice(candidates)
