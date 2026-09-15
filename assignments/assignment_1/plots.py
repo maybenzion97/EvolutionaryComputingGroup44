@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.ticker import StrMethodFormatter
 
 from conditions import Condition
 from problem import TARGET_SIZES
@@ -83,10 +82,10 @@ def plot_fitness_curve(
     data: pd.DataFrame, conditions: list[Condition], figures: Path
 ) -> None:
     fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.3))
-    plot_mean_and_std(ax, data, "evaluations", "best_fitness", conditions)
-    ax.set_xlabel("evaluations")
+    # random search logs each batch of pop_size bodies as one generation
+    plot_mean_and_std(ax, data, "generation", "best_fitness", conditions)
+    ax.set_xlabel("generation")
     ax.set_ylabel("best fitness (lower is better)")
-    ax.xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
     legend_above(ax)
     save(fig, figures, "fitness_curve")
 

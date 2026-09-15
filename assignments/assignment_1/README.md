@@ -121,6 +121,23 @@ the chance that a run of `a` beats a run of `b` (0.5 means no difference).
 
 Source material for the Methods and Discussion sections of the report.
 
+- **Population 100, 100 generations.** Within the range the assignment
+  recommends (50 to 100 bodies over 100 generations).
+- **Binary tournament (k = 2) as the baseline.** The most common tournament
+  size, with weak selection pressure.
+- **Crossover probability 0.7.** A common value in the usual 0.6 to 0.9 range.
+  It was not tuned: the research question is about selection, so the variation
+  operators are kept at standard settings and identical in every condition.
+- **One mutation per child, chosen uniformly from ariel's four tree
+  mutations.** Every child differs from its parents even when crossover is
+  skipped (30% of the time), and no single operator is favoured. In an earlier
+  pilot (3 seeds, a different survivor scheme), adding a mutation that grows
+  bodies gave the same final fitness (12.23 vs 12.25), which suggests the exact
+  mix matters little.
+- **Subtree replacement adds a branch of 1 to 3 modules.** This is ariel's
+  built-in limit (the code passes `max_modules=3`, which matches it). Small
+  branches keep the mutation a local change and rarely push a body over the size
+  limit.
 - **Tournament without replacement.** A tournament of size k compares k
   different bodies. Sizes below 1 or above the population size are rejected.
 - **Calibrating the control.** `calibrate_k.py` lets lexicase and tournaments of

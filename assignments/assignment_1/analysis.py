@@ -1,7 +1,7 @@
 """Figures and statistics for the report.
 
 Reads results/<condition>/seed_XX/ and writes to figures/:
-  fitness_curve        best fitness against evaluations (mean and std over seeds)
+  fitness_curve        best fitness per generation (mean and std over seeds)
   diversity_curve      population diversity per generation
   selection_strength   different parents per generation
   closest_per_target   the closest body to each target at the end of the run
