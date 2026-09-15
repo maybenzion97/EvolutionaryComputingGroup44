@@ -1,12 +1,12 @@
-"""The optimisation problem: target bodies, body budget, fitness and diversity."""
+"""The optimisation problem: target bodies, body budget and fitness."""
 
 import random
 from pathlib import Path
-from typing import Literal, NamedTuple, TypeVar
+from typing import Literal, NamedTuple, cast
 
 import numpy as np
-
 from ariel.body_phenotypes.robogen_lite.decoders._blueprint import load_graph_from_json
+from ariel.ec import Individual, JSONType
 from ariel.ec.genotypes.tree.operators import random_tree
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 
@@ -19,10 +19,7 @@ TARGET_SIZES = [target.number_of_nodes() for target in TARGETS]  # 7, 11, 15, 19
 MAX_MODULES = 20  # not counting the core
 MAX_NODES = MAX_MODULES + 1
 
-DIVERSITY_SAMPLE = 20  # bodies used to estimate population diversity
-
 InitSize = Literal["uniform", "full"]
-T = TypeVar("T")
 
 
 class Evaluation(NamedTuple):
@@ -64,20 +61,15 @@ def evaluate_genome(genome: TreeGenome) -> Evaluation:
     return Evaluation(fitness, dists, len(genome.nodes))
 
 
-def diversity(genomes: list[TreeGenome]) -> float:
-    """Mean edit distance between all pairs of the given bodies."""
-    graphs = [genome.to_networkx() for genome in genomes]
-    distances = []
-    for i, a in enumerate(graphs):
-        for b in graphs[i + 1 :]:
-            distances.append(tree_edit_distance(a, b))
-    return float(np.mean(distances))
+def evaluation_tags(result: Evaluation) -> dict[JSONType, JSONType]:
+    """What the EA stores in an individual's tags after evaluating it."""
+    return {"dists": result.dists, "size": result.size}
 
 
-def diversity_rng(seed: int) -> random.Random:
-    # a separate generator, so that measuring diversity does not change the run
-    return random.Random(10_000 + seed)
+def distances_of(ind: Individual) -> list[float]:
+    # ariel types tags as generic JSON; evaluation_tags() decides what is in them
+    return cast("list[float]", ind.tags["dists"])
 
 
-def sample_for_diversity(items: list[T], rng: random.Random) -> list[T]:
-    return rng.sample(items, min(DIVERSITY_SAMPLE, len(items)))
+def evaluation_of(ind: Individual) -> Evaluation:
+    return Evaluation(ind.fitness, distances_of(ind), cast("int", ind.tags["size"]))

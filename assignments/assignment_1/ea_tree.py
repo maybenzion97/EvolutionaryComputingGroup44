@@ -6,7 +6,8 @@ tree mutation per child -> drop children with more than 21 nodes -> evaluate
 
 Usage (from the repository root):
     uv run python assignments/assignment_1/ea_tree.py --selection lexicase --seed 0
-    uv run python assignments/assignment_1/ea_tree.py --selection tournament --k 2 --seed 0
+    uv run python assignments/assignment_1/ea_tree.py \
+        --selection tournament --k 2 --seed 0
 
 Results are written to results/<condition>/seed_XX/.
 """
@@ -17,7 +18,7 @@ import random
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from ariel.ec import EA, EAOperation, Individual, Population
 from ariel.ec.genotypes.tree.operators import (
@@ -29,20 +30,28 @@ from ariel.ec.genotypes.tree.operators import (
 )
 from ariel.ec.genotypes.tree.tree_genome import TreeGenome
 
+from metrics import diversity, diversity_rng, sample_for_diversity
 from problem import (
     MAX_NODES,
     TARGET_SIZES,
-    Evaluation,
     InitSize,
-    diversity,
-    diversity_rng,
     evaluate_genome,
+    evaluation_of,
+    evaluation_tags,
     random_genome,
-    sample_for_diversity,
     seed_everything,
 )
-from records import RESULTS_DIR, HistoryWriter, ensure_fresh, generation_row, save_json
+from records import (
+    RESULTS_DIR,
+    HistoryWriter,
+    body_summary,
+    ensure_fresh,
+    generation_row,
+    save_json,
+)
 from selection import Selector, make_selector
+
+MAX_ATTEMPTS_PER_CHILD = 20
 
 
 def mutate_subtree(genome: TreeGenome) -> None:
@@ -98,13 +107,6 @@ def copy_genome(ind: Individual) -> TreeGenome:
     return TreeGenome.from_dict(copy.deepcopy(ind.genotype))
 
 
-def evaluation_of(ind: Individual) -> Evaluation:
-    # ariel types tags as generic JSON; evaluate() stores these two entries
-    dists = cast("list[float]", ind.tags["dists"])
-    size = cast("int", ind.tags["size"])
-    return Evaluation(ind.fitness, dists, size)
-
-
 def record(individuals: list[Individual], run: RunState) -> None:
     sample = sample_for_diversity(individuals, run.diversity_rng)
     row = generation_row(
@@ -125,11 +127,19 @@ def record(individuals: list[Individual], run: RunState) -> None:
 
 def reproduce(population: Population, run: RunState) -> Population:
     pop_size = run.config.pop_size
+    max_attempts = MAX_ATTEMPTS_PER_CHILD * pop_size
     parents = population.alive.to_list()
     children = []
     picks = []
 
+    attempts = 0
     while len(children) < pop_size:
+        attempts += 1
+        if attempts > max_attempts:
+            raise RuntimeError(
+                f"only {len(children)} of {pop_size} children were small enough "
+                f"after {max_attempts} attempts"
+            )
         parent_a = run.select(parents)
         parent_b = run.select(parents)
         picks += [id(parent_a), id(parent_b)]
@@ -150,16 +160,16 @@ def reproduce(population: Population, run: RunState) -> Population:
     return population
 
 
-def evaluate(population: Population, run: RunState) -> Population:
+def evaluate(population: Population) -> Population:
     for ind in population.unevaluated:
         result = evaluate_genome(TreeGenome.from_dict(ind.genotype))
         ind.fitness = result.fitness
-        ind.tags = {"dists": result.dists, "size": result.size}
+        ind.tags = evaluation_tags(result)
     return population
 
 
 def survivor_selection(population: Population, run: RunState) -> Population:
-    """The children replace the parents; the best parent takes the place of the worst child."""
+    """Children replace the parents; the best parent replaces the worst child."""
     alive = population.alive.to_list()
     # Children made in this generation have not been saved yet, so the EA engine
     # has not set their time_of_birth.
@@ -168,7 +178,8 @@ def survivor_selection(population: Population, run: RunState) -> Population:
     n = run.config.pop_size
     if len(parents) != n or len(children) != n:
         raise RuntimeError(
-            f"expected {n} parents and {n} children, got {len(parents)} and {len(children)}"
+            f"expected {n} parents and {n} children, "
+            f"got {len(parents)} and {len(children)}"
         )
 
     elite = min(parents, key=lambda ind: ind.fitness)
@@ -185,25 +196,17 @@ def log_generation(population: Population, run: RunState) -> Population:
     return population
 
 
-def describe(ind: Individual) -> dict[str, Any]:
-    result = evaluation_of(ind)
-    return {
-        "fitness": result.fitness,
-        "size": result.size,
-        "dists": dict(zip(TARGET_SIZES, result.dists)),
-        "genotype": ind.genotype,
-    }
-
-
 def save_final(individuals: list[Individual], out: Path) -> None:
     """Save the best body and, for each target, the body closest to it."""
     best = min(individuals, key=lambda ind: ind.fitness)
-    save_json(out / "best_body.json", describe(best))
+    save_json(out / "best_body.json", body_summary(evaluation_of(best), best.genotype))
 
     specialists: dict[str, Any] = {}
     for j, size in enumerate(TARGET_SIZES):
         closest = min(individuals, key=lambda ind: evaluation_of(ind).dists[j])
-        specialists[f"target_{size}"] = describe(closest)
+        specialists[f"target_{size}"] = body_summary(
+            evaluation_of(closest), closest.genotype
+        )
     save_json(out / "specialists.json", specialists)
 
 
@@ -231,12 +234,12 @@ def run_experiment(
     initial = Population(
         [make_individual(random_genome(cfg.init_size)) for _ in range(cfg.pop_size)]
     )
-    evaluate(initial, run)
+    evaluate(initial)
     record(initial.to_list(), run)  # generation 0
 
     steps = [
         EAOperation(reproduce, run=run),
-        EAOperation(evaluate, run=run),
+        EAOperation(evaluate),
         EAOperation(survivor_selection, run=run),
         *(extra_steps or []),
         EAOperation(log_generation, run=run),
@@ -260,7 +263,8 @@ def run_experiment(
     best = min(ind.fitness for ind in final)
     seconds = time.perf_counter() - start
     print(
-        f"{cfg.condition} seed {cfg.seed}: best fitness {best:.3f} ({seconds:.0f}s) -> {out}"
+        f"{cfg.condition} seed {cfg.seed}: best fitness {best:.3f} "
+        f"({seconds:.0f}s) -> {out}"
     )
     return out
 

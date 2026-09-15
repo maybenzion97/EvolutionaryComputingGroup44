@@ -87,6 +87,16 @@ class HistoryWriter:
         self.file.close()
 
 
+def body_summary(result: Evaluation, genotype: Any) -> dict[str, Any]:
+    """One body as saved in best_body.json and specialists.json."""
+    return {
+        "fitness": result.fitness,
+        "size": result.size,
+        "dists": dict(zip(TARGET_SIZES, result.dists, strict=True)),
+        "genotype": genotype,
+    }
+
+
 def ensure_fresh(out: Path, overwrite: bool) -> None:
     if (out / "history.csv").exists() and not overwrite:
         raise SystemExit(f"{out} already has results (use --out-dir or --overwrite)")

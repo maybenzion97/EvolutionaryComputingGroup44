@@ -7,20 +7,20 @@ individual's tags.
 
 import random
 from collections.abc import Callable, Sequence
-from typing import cast
 
 from ariel.ec import Individual
+
+from problem import distances_of
 
 Selector = Callable[[list[Individual]], Individual]
 
 
-def distances(ind: Individual) -> list[float]:
-    # ariel types tags as generic JSON; the EA stores the distances under "dists"
-    return cast("list[float]", ind.tags["dists"])
-
-
 def tournament(parents: list[Individual], k: int = 2) -> Individual:
     """Pick k different parents at random and return the one with the lowest fitness."""
+    if k > len(parents):
+        raise ValueError(
+            f"tournament size {k} is larger than the population ({len(parents)})"
+        )
     return min(random.sample(parents, k), key=lambda ind: ind.fitness)
 
 
@@ -32,14 +32,14 @@ def lexicase(
 
     `order` fixes the order of the targets; the tests use it.
     """
-    n_targets = len(distances(parents[0]))
+    n_targets = len(distances_of(parents[0]))
     if order is None:
         order = random.sample(range(n_targets), n_targets)
 
     candidates = parents
     for target in order:
-        best = min(distances(ind)[target] for ind in candidates)
-        candidates = [ind for ind in candidates if distances(ind)[target] == best]
+        best = min(distances_of(ind)[target] for ind in candidates)
+        candidates = [ind for ind in candidates if distances_of(ind)[target] == best]
         if len(candidates) == 1:
             break
     return random.choice(candidates)
@@ -47,6 +47,8 @@ def lexicase(
 
 def make_selector(name: str, k: int = 2) -> Selector:
     if name == "tournament":
+        if k < 1:
+            raise ValueError(f"tournament size must be at least 1, got {k}")
         return lambda parents: tournament(parents, k)
     if name == "lexicase":
         return lexicase

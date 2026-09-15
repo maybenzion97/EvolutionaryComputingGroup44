@@ -15,7 +15,6 @@ import csv
 import random
 
 import numpy as np
-
 from ariel.ec import EAOperation, Population
 
 from ea_tree import RunConfig, run_experiment

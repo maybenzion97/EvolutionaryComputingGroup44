@@ -12,17 +12,16 @@ import argparse
 import time
 from pathlib import Path
 
-from problem import (
-    TARGET_SIZES,
-    InitSize,
-    diversity,
-    diversity_rng,
-    evaluate_genome,
-    random_genome,
-    sample_for_diversity,
-    seed_everything,
+from metrics import diversity, diversity_rng, sample_for_diversity
+from problem import InitSize, evaluate_genome, random_genome, seed_everything
+from records import (
+    RESULTS_DIR,
+    HistoryWriter,
+    body_summary,
+    ensure_fresh,
+    generation_row,
+    save_json,
 )
-from records import RESULTS_DIR, HistoryWriter, ensure_fresh, generation_row, save_json
 
 
 def run_random_search(
@@ -56,7 +55,7 @@ def run_random_search(
     for generation in range(generations + 1):
         genomes = [random_genome(init_size) for _ in range(pop_size)]
         batch = [evaluate_genome(genome) for genome in genomes]
-        for genome, result in zip(genomes, batch):
+        for genome, result in zip(genomes, batch, strict=True):
             if best is None or result.fitness < best.fitness:
                 best = result
                 best_genotype = genome.to_dict()
@@ -72,16 +71,11 @@ def run_random_search(
     history.close()
     assert best is not None and best_genotype is not None
 
-    best_body = {
-        "fitness": best.fitness,
-        "size": best.size,
-        "dists": dict(zip(TARGET_SIZES, best.dists)),
-        "genotype": best_genotype,
-    }
-    save_json(out_dir / "best_body.json", best_body)
+    save_json(out_dir / "best_body.json", body_summary(best, best_genotype))
     seconds = time.perf_counter() - start
     print(
-        f"random seed {seed}: best fitness {best.fitness:.3f} ({seconds:.0f}s) -> {out_dir}"
+        f"random seed {seed}: best fitness {best.fitness:.3f} "
+        f"({seconds:.0f}s) -> {out_dir}"
     )
     return out_dir
 

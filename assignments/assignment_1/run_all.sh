@@ -2,7 +2,7 @@
 # Final experiments: 10 seeds x 4 conditions (3 EAs + random search).
 #
 # Run from the repository root, after calibrate_k.py has chosen the control's k:
-#     K_CONTROL=7 bash assignments/assignment_1/run_all.sh
+#     K_CONTROL=40 bash assignments/assignment_1/run_all.sh
 # Optional: SEEDS="0 1 2" to run a subset; OVERWRITE=1 to replace existing runs
 # (without it, the scripts stop instead of overwriting results).
 set -euo pipefail

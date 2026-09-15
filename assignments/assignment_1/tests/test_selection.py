@@ -1,9 +1,10 @@
 """The worked example from our proposal: four bodies and their distances to the
 7, 11, 15, 19 and 25-node targets."""
 
+import pytest
 from ariel.ec import Individual
 
-from selection import lexicase, tournament
+from selection import lexicase, make_selector, tournament
 
 
 def body(fitness: float, dists: list[float]) -> Individual:
@@ -36,3 +37,13 @@ def test_lexicase_starting_with_the_largest_target_picks_c():
 def test_tournament_picks_the_lower_fitness():
     bodies = example_bodies()
     assert tournament([bodies["A"], bodies["C"]], k=2) is bodies["C"]
+
+
+def test_tournament_larger_than_the_population_is_rejected():
+    with pytest.raises(ValueError):
+        tournament(list(example_bodies().values()), k=5)
+
+
+def test_tournament_size_below_one_is_rejected():
+    with pytest.raises(ValueError):
+        make_selector("tournament", k=0)
