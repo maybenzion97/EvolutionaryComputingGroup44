@@ -1,51 +1,47 @@
-"""Parent selection: the aspect of the EA this research question varies.
+"""Parent selection: tournament and lexicase.
 
-Both selectors take the list of current parents (evaluated `Individual`s whose
-tags hold the five per-target distances) and return ONE chosen parent.
+Both functions take the current parents and return one of them. Lexicase uses
+the distances to the individual targets, which the EA stores in each
+individual's tags.
 """
 
-# Standard library
 import random
 from collections.abc import Callable, Sequence
 
-# Local libraries (ARIEL)
 from ariel.ec import Individual
 
-# Local scripts
-from common import N_TARGETS
-
-type Selector = Callable[[list[Individual]], Individual]
+Selector = Callable[[list[Individual]], Individual]
 
 
 def tournament(parents: list[Individual], k: int = 2) -> Individual:
-    """Draw k distinct bodies at random; the lowest mean + std wins."""
+    """Pick k different parents at random and return the one with the lowest fitness."""
     return min(random.sample(parents, k), key=lambda ind: ind.fitness)
 
 
-def lexicase(parents: list[Individual], order: Sequence[int] | None = None) -> Individual:
-    """Filter the parents one target at a time, in a fresh random order.
+def lexicase(
+    parents: list[Individual], order: Sequence[int] | None = None
+) -> Individual:
+    """Go through the targets in a random order, each time keeping only the
+    parents that are closest to that target.
 
-    On each target only the bodies with the lowest distance survive; stop when
-    one is left, or pick at random among the survivors once all targets are
-    used. `order` fixes the target order (only for testing).
+    `order` fixes the order of the targets; the tests use it.
     """
-    candidates = list(parents)
-    cases = order if order is not None else random.sample(range(N_TARGETS), N_TARGETS)
-    for case in cases:
-        best = min(ind.tags["dists"][case] for ind in candidates)
-        candidates = [ind for ind in candidates if ind.tags["dists"][case] == best]
+    n_targets = len(parents[0].tags["dists"])
+    if order is None:
+        order = random.sample(range(n_targets), n_targets)
+
+    candidates = parents
+    for target in order:
+        best = min(ind.tags["dists"][target] for ind in candidates)
+        candidates = [ind for ind in candidates if ind.tags["dists"][target] == best]
         if len(candidates) == 1:
             break
     return random.choice(candidates)
 
 
 def make_selector(name: str, k: int = 2) -> Selector:
-    """Return the selector for a condition name ("tournament" or "lexicase")."""
-    match name:
-        case "tournament":
-            return lambda parents: tournament(parents, k)
-        case "lexicase":
-            return lexicase
-        case _:
-            msg = f"unknown selection scheme: {name!r}"
-            raise ValueError(msg)
+    if name == "tournament":
+        return lambda parents: tournament(parents, k)
+    if name == "lexicase":
+        return lexicase
+    raise ValueError(f"unknown selection: {name}")

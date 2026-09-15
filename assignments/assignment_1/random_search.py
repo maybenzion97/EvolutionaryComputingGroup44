@@ -1,96 +1,108 @@
-"""Random-search baseline at the same evaluation budget as the EA.
+"""Random search baseline with the same number of evaluations as the EA.
 
-Samples bodies in blocks of `pop_size` (one block per "generation") for
-`generations + 1` blocks, i.e. exactly as many evaluations as the EA, and
-writes the same CSV columns so the analysis treats it like any other condition.
-`best_fitness` is the best body found so far; the other columns describe the
-current block.
+Bodies are sampled in batches of pop_size, one batch per "generation", so the
+CSV lines up with the EA's. best_fitness is the best body found so far; the
+other columns describe the current batch.
 
 Usage (from the repository root):
     uv run python assignments/assignment_1/random_search.py --seed 0
 """
 
-# Standard library
 import argparse
-import random
 import time
 from pathlib import Path
 
-# Local scripts
-from common import (
-    RESULTS_DIR,
+from problem import (
     TARGET_SIZES,
-    HistoryWriter,
+    InitSize,
     diversity,
-    ensure_fresh,
+    diversity_rng,
     evaluate_genome,
-    generation_row,
     random_genome,
-    save_json,
+    sample_for_diversity,
     seed_everything,
 )
+from records import RESULTS_DIR, HistoryWriter, ensure_fresh, generation_row, save_json
 
 
 def run_random_search(
     seed: int,
     pop_size: int = 100,
     generations: int = 100,
-    init_size: str = "uniform",
+    init_size: InitSize = "uniform",
     out_dir: Path | None = None,
     overwrite: bool = False,
 ) -> Path:
     start = time.perf_counter()
-    out = out_dir or RESULTS_DIR / "random" / f"seed_{seed:02d}"
-    ensure_fresh(out, overwrite)
-    save_json(
-        out / "config.json",
-        {"condition": "random", "seed": seed, "pop_size": pop_size,
-         "generations": generations, "init_size": init_size},
-    )
-    seed_everything(seed)
-    diversity_rng = random.Random(10_000 + seed)
-    history = HistoryWriter(out / "history.csv")
+    if out_dir is None:
+        out_dir = RESULTS_DIR / "random" / f"seed_{seed:02d}"
+    ensure_fresh(out_dir, overwrite)
+    config = {
+        "condition": "random",
+        "selection": "random",
+        "seed": seed,
+        "pop_size": pop_size,
+        "generations": generations,
+        "init_size": init_size,
+    }
+    save_json(out_dir / "config.json", config)
 
-    best: dict | None = None
+    seed_everything(seed)
+    rng = diversity_rng(seed)
+    history = HistoryWriter(out_dir / "history.csv")
+    best = None
+    best_genotype = None
+
     for generation in range(generations + 1):
         genomes = [random_genome(init_size) for _ in range(pop_size)]
-        results = [evaluate_genome(g) for g in genomes]
-        for genome, result in zip(genomes, results, strict=True):
-            if best is None or result["fitness"] < best["fitness"]:
-                best = {**result, "genotype": genome.to_dict()}
+        batch = [evaluate_genome(genome) for genome in genomes]
+        for genome, result in zip(genomes, batch):
+            if best is None or result.fitness < best.fitness:
+                best = result
+                best_genotype = genome.to_dict()
 
         row = generation_row(
             generation=generation,
             evaluations=(generation + 1) * pop_size,
-            fitnesses=[r["fitness"] for r in results],
-            dists=[r["dists"] for r in results],
-            sizes=[r["size"] for r in results],
-            diversity_value=diversity(genomes, diversity_rng),
+            population=batch,
+            diversity_value=diversity(sample_for_diversity(genomes, rng)),
+            best=best,
         )
-        # best-so-far instead of best-in-block
-        row["best_fitness"] = best["fitness"]
-        row["best_size"] = best["size"]
-        for j, s in enumerate(TARGET_SIZES):
-            row[f"best_dist_{s}"] = best["dists"][j]
         history.write(row)
-
     history.close()
-    best["dists"] = dict(zip(TARGET_SIZES, best["dists"], strict=True))
-    save_json(out / "best_body.json", best)
-    print(f"random seed {seed}: best fitness {best['fitness']:.3f} "
-          f"({time.perf_counter() - start:.0f}s) -> {out}")
-    return out
+
+    best_body = {
+        "fitness": best.fitness,
+        "size": best.size,
+        "dists": dict(zip(TARGET_SIZES, best.dists)),
+        "genotype": best_genotype,
+    }
+    save_json(out_dir / "best_body.json", best_body)
+    seconds = time.perf_counter() - start
+    print(
+        f"random seed {seed}: best fitness {best.fitness:.3f} ({seconds:.0f}s) -> {out_dir}"
+    )
+    return out_dir
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser = argparse.ArgumentParser(description="Random search baseline.")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--pop-size", type=int, default=100)
     parser.add_argument("--generations", type=int, default=100)
     parser.add_argument("--init-size", choices=["uniform", "full"], default="uniform")
-    parser.add_argument("--out-dir", type=Path, default=None,
-                        help="use for test runs so they never replace final results")
-    parser.add_argument("--overwrite", action="store_true", help="replace an existing run")
+    parser.add_argument(
+        "--out-dir", type=Path, help="output folder, e.g. for test runs"
+    )
+    parser.add_argument(
+        "--overwrite", action="store_true", help="replace an existing run"
+    )
     args = parser.parse_args()
-    run_random_search(args.seed, args.pop_size, args.generations, args.init_size,
-                      args.out_dir, args.overwrite)
+    run_random_search(
+        args.seed,
+        args.pop_size,
+        args.generations,
+        args.init_size,
+        args.out_dir,
+        args.overwrite,
+    )
