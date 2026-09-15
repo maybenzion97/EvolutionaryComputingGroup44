@@ -19,7 +19,7 @@ from pathlib import Path
 
 import matplotlib as mpl
 
-mpl.use("Agg")  # no window needed, we only save files
+mpl.use("Agg")  
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -29,8 +29,6 @@ from problem import TARGET_SIZES
 from records import FIGURES_DIR, RESULTS_DIR, check_consistent, load_histories
 
 # Each condition gets a colour and a marker by its role in the experiment.
-# The colours are readable with colour blindness, and the markers keep the
-# conditions apart when the report is printed in grayscale.
 COLORS = {
     "baseline": "#2a78d6",
     "lexicase": "#eb6834",
@@ -46,7 +44,7 @@ MARKERS = {
     "other": "v",
 }
 ROLE_ORDER = ["baseline", "lexicase", "control", "random", "other"]
-COLUMN_WIDTH = 3.33  # inches, one column of the GECCO template
+COLUMN_WIDTH = 3.33  
 
 
 @dataclass
@@ -54,7 +52,7 @@ class Condition:
     name: str
     role: str
     label: str
-    short_label: str  # two lines, for the box plot
+    short_label: str 
 
     @property
     def color(self) -> str:
@@ -138,7 +136,7 @@ def set_plot_style() -> None:
             "lines.linewidth": 1.5,
             "legend.frameon": False,
             "savefig.bbox": "tight",
-            "pdf.fonttype": 42,  # embed the fonts as TrueType
+            "pdf.fonttype": 42,  
         }
     )
 

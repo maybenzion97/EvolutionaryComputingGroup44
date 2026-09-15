@@ -11,8 +11,6 @@ Usage (from the repository root):
 Results are written to results/<condition>/seed_XX/.
 """
 
-# Don't add `from __future__ import annotations` to this file: EAOperation checks
-# that each step's first argument is annotated with the real Population class.
 
 import argparse
 import copy
