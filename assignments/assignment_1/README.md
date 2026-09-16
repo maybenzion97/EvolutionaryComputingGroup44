@@ -13,6 +13,27 @@ child, and generational replacement that keeps the best parent.
 
 Run all commands from the **repository root**.
 
+## Setup
+
+You need Python 3.12 or newer and [uv](https://docs.astral.sh/uv/). From a fresh
+clone of the repository:
+
+```bash
+uv venv    # create the virtual environment
+uv sync    # install ariel and every dependency, at the versions in uv.lock
+```
+
+Every command below starts with `uv run`, which uses that environment, so there
+is nothing to activate. The `src/ariel` framework is installed from this
+repository, not from PyPI. The root [`README.md`](../../README.md) documents the
+framework itself and its MuJoCo requirement.
+
+To check the setup before running anything long:
+
+```bash
+uv run pytest assignments/assignment_1/tests
+```
+
 ## Files
 
 | File | What it does |
@@ -76,11 +97,9 @@ the four commands reproduced all 43 `history.csv` files, `stats.csv`,
 `summary.csv` and the five `.png` figures byte-identical to the committed ones,
 and the calibration chose k = 40 again.
 
-The five `.pdf` figures are the one exception, and only in their metadata:
-matplotlib writes the generation time into each PDF, so those files differ from
-the committed ones by the four bytes of the `/CreationDate` timestamp while the
-drawing itself is identical. Set `SOURCE_DATE_EPOCH` before step 3 if you want
-the PDFs to match byte for byte as well.
+The five `.pdf` figures differ only in metadata: matplotlib stamps the generation
+time into each one, so they differ by the four bytes of `/CreationDate` while the
+drawing is identical. Set `SOURCE_DATE_EPOCH` before step 3 to make them match too.
 
 ### One run on its own
 
@@ -177,10 +196,9 @@ results.
 - **One mutation per child, chosen uniformly from ariel's four tree
   mutations.** Every child differs from its parents even when crossover is
   skipped (30% of the time), and no single operator is favoured.
-- **Subtree replacement adds a branch of 1 to 3 modules.** This is ariel's
-  built-in limit (the code passes `max_modules=3`, which matches it). Small
-  branches keep the mutation a local change and rarely push a body over the size
-  limit.
+- **Subtree replacement adds a branch of 1 to 3 modules**, ariel's built-in
+  limit. Small branches keep the mutation local and rarely push a body over the
+  size limit.
 - **Tournament without replacement.** A tournament of size k compares k
   different bodies. Sizes below 1 or above the population size are rejected.
 - **Initial bodies get 1 to 20 modules.** `random_tree(20)` always builds full
@@ -206,7 +224,9 @@ results.
 - Diversity is measured with its own generator, so logging it cannot change a
   run.
 - Library versions are pinned by `uv.lock`, which is what makes the byte-for-byte
-  rebuild dependable.
+  rebuild dependable. Note that pandas and scipy are not listed in
+  `pyproject.toml`: they arrive as dependencies of other packages, so re-resolving
+  instead of installing from the lock file could change or drop them.
 - We make no changes to the ariel framework (`src/ariel`). It does contain one
   fix that postdates our first results: upstream commit `3c62f63`, written by
   the course maintainer and merged here in `4faa361`, repairs `subtree_swap`.
