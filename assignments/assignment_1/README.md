@@ -95,11 +95,8 @@ OVERWRITE=1 K_CONTROL=40 bash assignments/assignment_1/run_all.sh
 Every run is seeded, so this rebuild is exact. Deleting both folders and running
 the four commands reproduced all 43 `history.csv` files, `stats.csv`,
 `summary.csv` and the five `.png` figures byte-identical to the committed ones,
-and the calibration chose k = 40 again.
-
-The five `.pdf` figures differ only in metadata: matplotlib stamps the generation
-time into each one, so they differ by the four bytes of `/CreationDate` while the
-drawing is identical. Set `SOURCE_DATE_EPOCH` before step 3 to make them match too.
+and the calibration chose k = 40 again. The `.pdf` figures differ only by the
+timestamp matplotlib stamps into them; the drawings are identical.
 
 ### One run on its own
 
