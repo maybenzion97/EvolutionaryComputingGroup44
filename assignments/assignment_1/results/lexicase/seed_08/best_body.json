@@ -1,10 +1,10 @@
 {
-  "fitness": 12.991153452528778,
-  "size": 12,
+  "fitness": 12.878232998312527,
+  "size": 15,
   "dists": {
-    "7": 10.5,
-    "11": 11.5,
-    "15": 8.5,
+    "7": 11.5,
+    "11": 12.0,
+    "15": 11.5,
     "19": 13.0,
     "25": 13.0
   },
@@ -14,106 +14,133 @@
         "type": "CORE",
         "rotation": "DEG_0"
       },
-      "3": {
-        "type": "BRICK",
-        "rotation": "DEG_0"
-      },
       "6": {
         "type": "BRICK",
         "rotation": "DEG_45"
       },
-      "16": {
-        "type": "BRICK",
+      "11": {
+        "type": "HINGE",
         "rotation": "DEG_90"
       },
-      "25": {
-        "type": "HINGE",
-        "rotation": "DEG_45"
+      "12": {
+        "type": "BRICK",
+        "rotation": "DEG_90"
       },
       "18": {
-        "type": "BRICK",
-        "rotation": "DEG_90"
-      },
-      "33": {
-        "type": "HINGE",
-        "rotation": "DEG_90"
-      },
-      "42": {
-        "type": "HINGE",
-        "rotation": "DEG_0"
-      },
-      "44": {
-        "type": "HINGE",
-        "rotation": "DEG_0"
-      },
-      "46": {
-        "type": "HINGE",
-        "rotation": "DEG_90"
-      },
-      "45": {
         "type": "HINGE",
         "rotation": "DEG_45"
       },
-      "47": {
+      "19": {
+        "type": "BRICK",
+        "rotation": "DEG_45"
+      },
+      "20": {
+        "type": "BRICK",
+        "rotation": "DEG_45"
+      },
+      "22": {
+        "type": "BRICK",
+        "rotation": "DEG_45"
+      },
+      "26": {
+        "type": "BRICK",
+        "rotation": "DEG_0"
+      },
+      "27": {
+        "type": "HINGE",
+        "rotation": "DEG_90"
+      },
+      "29": {
+        "type": "HINGE",
+        "rotation": "DEG_45"
+      },
+      "30": {
+        "type": "HINGE",
+        "rotation": "DEG_45"
+      },
+      "31": {
+        "type": "BRICK",
+        "rotation": "DEG_45"
+      },
+      "32": {
+        "type": "HINGE",
+        "rotation": "DEG_0"
+      },
+      "33": {
         "type": "HINGE",
         "rotation": "DEG_0"
       }
     },
     "edges": [
       {
-        "parent": 0,
-        "child": 3,
+        "parent": 11,
+        "child": 12,
         "face": "FRONT"
       },
       {
         "parent": 0,
-        "child": 16,
+        "child": 11,
         "face": "LEFT"
       },
       {
-        "parent": 3,
-        "child": 6,
-        "face": "FRONT"
-      },
-      {
-        "parent": 16,
-        "child": 25,
-        "face": "LEFT"
-      },
-      {
-        "parent": 16,
+        "parent": 12,
         "child": 18,
-        "face": "RIGHT"
+        "face": "FRONT"
       },
       {
-        "parent": 3,
-        "child": 33,
-        "face": "RIGHT"
+        "parent": 19,
+        "child": 20,
+        "face": "FRONT"
+      },
+      {
+        "parent": 20,
+        "child": 22,
+        "face": "BOTTOM"
+      },
+      {
+        "parent": 6,
+        "child": 19,
+        "face": "BOTTOM"
+      },
+      {
+        "parent": 6,
+        "child": 26,
+        "face": "LEFT"
+      },
+      {
+        "parent": 26,
+        "child": 27,
+        "face": "FRONT"
+      },
+      {
+        "parent": 29,
+        "child": 30,
+        "face": "FRONT"
       },
       {
         "parent": 0,
-        "child": 44,
+        "child": 29,
         "face": "BACK"
       },
       {
-        "parent": 3,
-        "child": 46,
-        "face": "BOTTOM"
+        "parent": 31,
+        "child": 32,
+        "face": "TOP"
       },
       {
-        "parent": 44,
-        "child": 45,
-        "face": "FRONT"
-      },
-      {
-        "parent": 6,
-        "child": 42,
+        "parent": 20,
+        "child": 31,
         "face": "LEFT"
       },
       {
-        "parent": 6,
-        "child": 47,
-        "face": "BOTTOM"
+        "parent": 22,
+        "child": 33,
+        "face": "TOP"
+      },
+      {
+        "parent": 0,
+        "child": 6,
+        "face": "FRONT"
       }
     ]
   }
