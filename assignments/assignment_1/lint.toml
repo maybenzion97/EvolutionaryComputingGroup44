@@ -1,0 +1,29 @@
+# Ruff settings for the assignment code. Not named ruff.toml on purpose: the
+# repository's pre-commit hooks would find a ruff.toml and start rewriting this
+# folder. Pass it explicitly, as shown in the README.
+line-length = 88
+target-version = "py312"
+fix = false
+extend-exclude = ["tree_edit_distance.py", "A1_template_2026.py"]
+
+[lint]
+select = ["E", "F", "W", "B", "I", "UP", "SIM"]
+
+[lint.isort]
+# Run from the repository root, ruff would take ariel (src/ariel) for our own
+# code and our scripts for third-party packages, so name both groups.
+known-first-party = [
+    "analysis",
+    "calibrate_k",
+    "conditions",
+    "ea_tree",
+    "metrics",
+    "plots",
+    "problem",
+    "random_search",
+    "records",
+    "selection",
+    "stats",
+    "tree_edit_distance",
+]
+known-third-party = ["ariel"]

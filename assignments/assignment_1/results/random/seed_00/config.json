@@ -1,0 +1,8 @@
+{
+  "condition": "random",
+  "selection": "random",
+  "seed": 0,
+  "pop_size": 100,
+  "generations": 100,
+  "init_size": "uniform"
+}
