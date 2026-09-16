@@ -85,7 +85,7 @@ def plot_fitness_curve(
     # random search logs each batch of pop_size bodies as one generation
     plot_mean_and_std(ax, data, "generation", "best_fitness", conditions)
     ax.set_xlabel("generation")
-    ax.set_ylabel("best fitness (lower is better)")
+    ax.set_ylabel("best fitness")
     legend_above(ax)
     save(fig, figures, "fitness_curve")
 
@@ -170,7 +170,7 @@ def plot_final_fitness(
             zorder=3,
         )
     ax.set_xticks(range(len(conditions)), [c.short_label for c in conditions])
-    ax.set_ylabel("final best fitness (lower is better)")
+    ax.set_ylabel("final best fitness")
     save(fig, figures, "final_fitness")
 
 
@@ -186,7 +186,7 @@ def make_all_figures(
         data,
         conditions,
         "diversity",
-        "diversity (mean pairwise dist.)",
+        "diversity",
         "diversity_curve",
         figures,
     )
