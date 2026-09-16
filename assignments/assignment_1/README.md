@@ -71,10 +71,16 @@ The scripts do not overwrite existing runs by default, so delete `results/` and
 OVERWRITE=1 K_CONTROL=40 bash assignments/assignment_1/run_all.sh
 ```
 
-Every run is seeded, so this rebuild is exact: after deleting both folders and
-running the four commands, all 43 `history.csv` files, `stats.csv`,
-`summary.csv` and the five figures came out byte-identical to the committed
-ones, and the calibration chose k = 40 again.
+Every run is seeded, so this rebuild is exact. Deleting both folders and running
+the four commands reproduced all 43 `history.csv` files, `stats.csv`,
+`summary.csv` and the five `.png` figures byte-identical to the committed ones,
+and the calibration chose k = 40 again.
+
+The five `.pdf` figures are the one exception, and only in their metadata:
+matplotlib writes the generation time into each PDF, so those files differ from
+the committed ones by the four bytes of the `/CreationDate` timestamp while the
+drawing itself is identical. Set `SOURCE_DATE_EPOCH` before step 3 if you want
+the PDFs to match byte for byte as well.
 
 ### One run on its own
 
@@ -117,7 +123,7 @@ figures/
 | `history.csv` | One row per generation: the data behind every figure and statistic (see the columns below) | yes (~15 KB) |
 | `best_body.json` | The best body of the run: its fitness, size, distance to each target, and the genome itself (nodes with type and rotation, edges with parent, child and face) | yes (~2.5 KB) |
 | `specialists.json` | The same description for the body closest to each of the five targets, taken from the final population. EA runs only: random search has no population to keep | yes (~10 KB) |
-| `database.db` | ariel's own record: one row per body ever created (10,100 per run), with its genome, fitness, tags, and the generations it was born and last seen in. We do not use it for the report; it is the full archive for later inspection | **no** (~10 MB per run, 343 MB in total; `run_all.sh` recreates it) |
+| `database.db` | ariel's own record: one row per body ever created (10,100 per run), with its genome, fitness, tags, and the generations it was born and last seen in. We do not use it for the report; it is the full archive for later inspection | **no** (~10 MB per run, 364 MB in total; `run_all.sh` recreates it) |
 | `calibration.csv`, `calibration.json` | Mean and std of the number of different parents each selector picks, and the chosen k. The evidence for k = 40 | yes |
 | `figures/*.pdf`, `figures/*.png` | The five report figures. PDF for LaTeX, PNG for quick viewing | yes |
 | `summary.csv` | Final-generation mean and std per condition. Two header rows: the metric, then `mean`/`std` | yes |
@@ -146,6 +152,10 @@ their means and standard deviations, the Mann-Whitney `U` and `p`,
 beats a run of `b`; 0.5 means no difference) and `p_holm` (`p` corrected within
 each hypothesis).
 
+## Linting and formatting
+
+The settings live in `lint.toml` rather than `ruff.toml` so that they apply only
+when passed explicitly, and never rewrite this folder as a side effect:
 
 ```bash
 uv run ruff check --no-fix --config assignments/assignment_1/lint.toml assignments/assignment_1
@@ -177,11 +187,11 @@ results.
   21-node bodies, which would make random search an unfairly weak baseline.
 - **Calibrating the control.** `calibrate_k.py` lets lexicase and tournaments of
   several sizes pick parents from the same lexicase populations: lexicase gave
-  8.6 different parents per 100 picks and k = 40 gave 8.7. The final runs
-  confirm the match on each condition's own populations: 8.83 for lexicase and
-  8.77 for k = 40 (`summary.csv`).
+  7.7 different parents per 100 picks and k = 40 gave 8.5, the closest of the
+  nine sizes tried. The final runs confirm the match on each condition's own
+  populations: 7.38 for lexicase and 8.66 for k = 40 (`summary.csv`).
 - **Lexicase with five targets is very selective.** It usually ends at the best
-  body for one target, so only about 9 different bodies reproduce per
+  body for one target, so only about 7 different bodies reproduce per
   generation.
 - **Diversity is estimated** from 20 randomly chosen bodies (190 pairs) to keep
   runs fast.
@@ -197,4 +207,10 @@ results.
   run.
 - Library versions are pinned by `uv.lock`, which is what makes the byte-for-byte
   rebuild dependable.
-- The ariel framework (`src/ariel`) is not modified.
+- We make no changes to the ariel framework (`src/ariel`). It does contain one
+  fix that postdates our first results: upstream commit `3c62f63`, written by
+  the course maintainer and merged here in `4faa361`, repairs `subtree_swap`.
+  Before it, the incoming subtree was copied into the receiving genome but
+  never attached to it, so the unreachable nodes were pruned and crossover only
+  deleted a branch from each parent instead of exchanging material. Results
+  produced before that merge are not comparable with these.

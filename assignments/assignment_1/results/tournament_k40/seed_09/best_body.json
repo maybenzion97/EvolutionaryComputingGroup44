@@ -26,37 +26,37 @@
         "type": "BRICK",
         "rotation": "DEG_45"
       },
-      "8": {
+      "12": {
         "type": "BRICK",
-        "rotation": "DEG_90"
+        "rotation": "DEG_45"
       },
       "13": {
         "type": "HINGE",
         "rotation": "DEG_0"
       },
-      "7": {
+      "14": {
         "type": "HINGE",
-        "rotation": "DEG_0"
-      },
-      "16": {
-        "type": "HINGE",
-        "rotation": "DEG_0"
+        "rotation": "DEG_45"
       },
       "15": {
         "type": "HINGE",
         "rotation": "DEG_0"
       },
-      "12": {
-        "type": "BRICK",
-        "rotation": "DEG_45"
+      "17": {
+        "type": "HINGE",
+        "rotation": "DEG_0"
       },
-      "10": {
+      "18": {
+        "type": "HINGE",
+        "rotation": "DEG_0"
+      },
+      "19": {
         "type": "BRICK",
         "rotation": "DEG_90"
       },
-      "17": {
-        "type": "HINGE",
-        "rotation": "DEG_45"
+      "20": {
+        "type": "BRICK",
+        "rotation": "DEG_90"
       }
     },
     "edges": [
@@ -76,44 +76,44 @@
         "face": "RIGHT"
       },
       {
-        "parent": 0,
-        "child": 8,
-        "face": "LEFT"
-      },
-      {
-        "parent": 3,
-        "child": 13,
-        "face": "FRONT"
-      },
-      {
-        "parent": 4,
-        "child": 7,
-        "face": "BOTTOM"
-      },
-      {
-        "parent": 0,
-        "child": 16,
-        "face": "RIGHT"
-      },
-      {
-        "parent": 4,
-        "child": 15,
-        "face": "TOP"
-      },
-      {
         "parent": 3,
         "child": 12,
         "face": "LEFT"
       },
       {
-        "parent": 8,
-        "child": 10,
+        "parent": 13,
+        "child": 14,
+        "face": "FRONT"
+      },
+      {
+        "parent": 0,
+        "child": 13,
+        "face": "RIGHT"
+      },
+      {
+        "parent": 3,
+        "child": 15,
+        "face": "FRONT"
+      },
+      {
+        "parent": 4,
+        "child": 17,
+        "face": "TOP"
+      },
+      {
+        "parent": 4,
+        "child": 18,
         "face": "BOTTOM"
       },
       {
-        "parent": 16,
-        "child": 17,
-        "face": "FRONT"
+        "parent": 0,
+        "child": 19,
+        "face": "LEFT"
+      },
+      {
+        "parent": 19,
+        "child": 20,
+        "face": "BOTTOM"
       }
     ]
   }
