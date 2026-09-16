@@ -4,13 +4,17 @@ from typing import Any, cast
 
 import numpy as np
 import pandas as pd
-from scipy.stats import mannwhitneyu
+from scipy.stats import PermutationMethod, wilcoxon
 
 from conditions import Condition
 from problem import TARGET_SIZES
 
 # Metrics where a higher value is better; for fitness and distances lower wins.
 HIGHER_IS_BETTER = {"diversity"}
+
+# Differences are rounded before testing so that values which are equal apart
+# from floating-point noise count as ties rather than as a real difference.
+DIFFERENCE_DECIMALS = 12
 
 
 def a12(x: np.ndarray, y: np.ndarray) -> float:
@@ -35,33 +39,65 @@ def holm(p_values: list[float]) -> list[float]:
 def compare(
     final: pd.DataFrame, hypothesis: str, metric: str, a: str, b: str
 ) -> dict[str, Any] | None:
-    """Mann-Whitney U test of condition a against condition b on one metric.
+    """Wilcoxon signed-rank test of condition a against condition b on one metric.
 
-    a12_a_better is the chance that a run of a beats a run of b, taking into
-    account whether lower or higher is better for this metric.
+    Every condition runs the same seeds from the same initial population, so the
+    runs come in matched pairs. Pairing on the seed removes the differences
+    between starting populations, which would otherwise count as noise. The test
+    is exact: with ten pairs there are only 2**10 sign patterns, so the p-value
+    comes from enumerating all of them rather than from a normal approximation.
+
+    mean_diff is a minus b in the metric's own units. a12_a_better is the chance
+    that a run of a beats a run of b, taking into account whether lower or higher
+    is better for this metric.
     """
-    x = final[final["condition"] == a][metric].to_numpy(dtype=float)
-    y = final[final["condition"] == b][metric].to_numpy(dtype=float)
-    if len(x) < 2 or len(y) < 2:
+    paired = _paired_values(final, metric, a, b)
+    if paired is None:
         return None
-    u, p = mannwhitneyu(x, y, alternative="two-sided")
+    x, y = paired
+    difference = np.round(x - y, DIFFERENCE_DECIMALS)
+    if not np.any(difference != 0):
+        return None
+    result = wilcoxon(
+        difference,
+        zero_method="wilcox",
+        alternative="two-sided",
+        method=PermutationMethod(n_resamples=np.inf),
+    )
     lower_is_better = metric not in HIGHER_IS_BETTER
     return {
         "hypothesis": hypothesis,
         "metric": metric,
         "a": a,
         "b": b,
-        "n_a": len(x),
-        "n_b": len(y),
+        "n_pairs": len(x),
         "mean_a": x.mean(),
         "std_a": x.std(ddof=1),
         "mean_b": y.mean(),
         "std_b": y.std(ddof=1),
-        "U": u,
-        "p": p,
+        "mean_diff": difference.mean(),
+        "a_better_in": int(
+            (difference < 0).sum() if lower_is_better else (difference > 0).sum()
+        ),
+        "W": float(result.statistic),
+        "p": float(result.pvalue),
         "lower_is_better": lower_is_better,
         "a12_a_better": a12(y, x) if lower_is_better else a12(x, y),
     }
+
+
+def _paired_values(
+    final: pd.DataFrame, metric: str, a: str, b: str
+) -> tuple[np.ndarray, np.ndarray] | None:
+    """Return the two conditions' values for the seeds they both ran."""
+    rows = final[final["condition"].isin([a, b])]
+    wide = rows.pivot(index="seed", columns="condition", values=metric).dropna()
+    if a not in wide or b not in wide or len(wide) < 2:
+        return None
+    return (
+        wide[a].to_numpy(dtype=float),
+        wide[b].to_numpy(dtype=float),
+    )
 
 
 def run_statistics(final: pd.DataFrame, conditions: list[Condition]) -> pd.DataFrame:

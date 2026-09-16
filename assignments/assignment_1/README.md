@@ -160,11 +160,19 @@ figures/
 
 ### Columns of `stats.csv`
 
-`hypothesis`, `metric`, the two conditions `a` and `b`, their sizes `n_a`/`n_b`,
-their means and standard deviations, the Mann-Whitney `U` and `p`,
-`lower_is_better` for the metric, `a12_a_better` (the chance that a run of `a`
-beats a run of `b`; 0.5 means no difference) and `p_holm` (`p` corrected within
-each hypothesis).
+`hypothesis`, `metric`, the two conditions `a` and `b`, `n_pairs` (seeds both
+conditions ran), their means and standard deviations, `mean_diff` (`a` minus `b`
+in the metric's own units), `a_better_in` (how many of the pairs `a` won), the
+Wilcoxon `W` and `p`, `lower_is_better` for the metric, `a12_a_better` (the
+chance that a run of `a` beats a run of `b`; 0.5 means no difference) and
+`p_holm` (`p` corrected within each hypothesis).
+
+Every condition runs the same seeds from the same initial population, so the
+runs form matched pairs and the test is a two-sided Wilcoxon signed-rank test on
+each seed's own difference. Pairing removes the differences between starting
+populations, which an unpaired test would count as noise. With ten pairs the
+p-value is exact, enumerating all 2<sup>10</sup> sign patterns, so the smallest
+value it can report is 0.002 before correction.
 
 ## Linting and formatting
 
