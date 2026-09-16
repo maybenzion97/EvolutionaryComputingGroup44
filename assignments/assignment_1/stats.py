@@ -10,7 +10,7 @@ from conditions import Condition
 from problem import TARGET_SIZES
 
 # Metrics where a higher value is better; for fitness and distances lower wins.
-HIGHER_IS_BETTER = {"diversity"}
+HIGHER_IS_BETTER = {"diversity", "diversity_over_run"}
 
 # Differences are rounded before testing so that values which are equal apart
 # from floating-point noise count as ties rather than as a real difference.
@@ -100,7 +100,20 @@ def _paired_values(
     )
 
 
-def run_statistics(final: pd.DataFrame, conditions: list[Condition]) -> pd.DataFrame:
+def diversity_over_run(data: pd.DataFrame) -> pd.DataFrame:
+    """Each run's mean diversity over generations 1 to the last.
+
+    Generation 0 is the initial population, which every condition shares for a
+    given seed, so it is left out of the average.
+    """
+    evolved = data[data["generation"] >= 1]
+    averaged = evolved.groupby(["condition", "seed"])["diversity"].mean().reset_index()
+    return averaged.rename(columns={"diversity": "diversity_over_run"})
+
+
+def run_statistics(
+    data: pd.DataFrame, final: pd.DataFrame, conditions: list[Condition]
+) -> pd.DataFrame:
     name_of = {c.role: c.name for c in conditions if c.role != "other"}
     eas = [c.name for c in conditions if c.role != "random"]
     lexicase = name_of.get("lexicase")
@@ -133,6 +146,22 @@ def run_statistics(final: pd.DataFrame, conditions: list[Condition]) -> pd.DataF
         result = compare(final, *test)
         if result is not None:
             rows.append(result)
+
+    # The same diversity contrast averaged over the run rather than read off the
+    # last generation, so a one-generation accident cannot carry H1 on its own.
+    if lexicase:
+        averaged = diversity_over_run(data)
+        for other in tournaments:
+            result = compare(
+                averaged,
+                "H1b diversity over run",
+                "diversity_over_run",
+                lexicase,
+                other,
+            )
+            if result is not None:
+                rows.append(result)
+
     stats = pd.DataFrame(rows)
     if not stats.empty:
         stats["p_holm"] = stats.groupby("hypothesis")["p"].transform(

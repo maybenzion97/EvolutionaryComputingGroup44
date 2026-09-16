@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from stats import a12, compare
+from stats import a12, compare, diversity_over_run
 
 
 def final_table(
@@ -79,6 +79,21 @@ def test_seeds_without_a_partner_are_dropped():
     result = compare(table, "H3", "best_fitness", "a", "b")
     assert result is not None
     assert result["n_pairs"] == 2
+
+
+def test_diversity_over_run_skips_the_initial_population():
+    """Generation 0 is shared by every condition, so it is left out."""
+    data = pd.DataFrame(
+        {
+            "condition": ["a"] * 3,
+            "seed": [0, 0, 0],
+            "generation": [0, 1, 2],
+            "diversity": [99.0, 4.0, 6.0],
+        }
+    )
+    averaged = diversity_over_run(data)
+    assert len(averaged) == 1
+    assert averaged.iloc[0]["diversity_over_run"] == 5.0
 
 
 def test_identical_runs_give_no_result():

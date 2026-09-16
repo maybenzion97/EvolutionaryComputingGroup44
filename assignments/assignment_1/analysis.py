@@ -50,7 +50,7 @@ def main() -> None:
 
     summary = summarise(data, final, conditions)
     summary.to_csv(args.figures / "summary.csv")
-    stats = run_statistics(final, conditions)
+    stats = run_statistics(data, final, conditions)
     stats.to_csv(args.figures / "stats.csv", index=False)
 
     with pd.option_context(
