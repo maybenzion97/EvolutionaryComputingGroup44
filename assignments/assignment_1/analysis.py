@@ -60,8 +60,9 @@ def main() -> None:
         print(summary)
         if not stats.empty:
             print(
-                "\nMann-Whitney U tests (p_holm is corrected within each hypothesis; "
-                "a12_a_better > 0.5 means a beats b):"
+                "\nWilcoxon signed-rank tests on seed-matched pairs (p_holm is "
+                "corrected within each hypothesis; a12_a_better > 0.5 means a "
+                "beats b):"
             )
             columns = [
                 "hypothesis",
@@ -70,6 +71,8 @@ def main() -> None:
                 "b",
                 "mean_a",
                 "mean_b",
+                "mean_diff",
+                "a_better_in",
                 "p",
                 "p_holm",
                 "a12_a_better",
