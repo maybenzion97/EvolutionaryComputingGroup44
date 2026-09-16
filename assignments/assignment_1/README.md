@@ -207,9 +207,10 @@ results.
   run.
 - Library versions are pinned by `uv.lock`, which is what makes the byte-for-byte
   rebuild dependable.
-- The ariel framework (`src/ariel`) carries one fix of our own: commit `3c62f63`
-  repairs `subtree_swap`. Before it, the incoming subtree was copied into the
-  receiving genome but never attached to it, so the unreachable nodes were
-  pruned and crossover only deleted a branch from each parent instead of
-  exchanging material. Results produced before that commit are not comparable
-  with these. Nothing else in `src/ariel` is changed.
+- We make no changes to the ariel framework (`src/ariel`). It does contain one
+  fix that postdates our first results: upstream commit `3c62f63`, written by
+  the course maintainer and merged here in `4faa361`, repairs `subtree_swap`.
+  Before it, the incoming subtree was copied into the receiving genome but
+  never attached to it, so the unreachable nodes were pruned and crossover only
+  deleted a branch from each parent instead of exchanging material. Results
+  produced before that merge are not comparable with these.
