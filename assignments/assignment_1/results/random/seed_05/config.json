@@ -1,5 +1,6 @@
 {
   "condition": "random",
+  "selection": "random",
   "seed": 5,
   "pop_size": 100,
   "generations": 100,
