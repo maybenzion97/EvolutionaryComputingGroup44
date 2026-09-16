@@ -23,10 +23,8 @@ uv venv    # create the virtual environment
 uv sync    # install ariel and every dependency, at the versions in uv.lock
 ```
 
-Every command below starts with `uv run`, which uses that environment, so there
-is nothing to activate. The `src/ariel` framework is installed from this
-repository, not from PyPI. The root [`README.md`](../../README.md) documents the
-framework itself and its MuJoCo requirement.
+The root [`README.md`](../../README.md) documents the framework itself and its
+MuJoCo requirement.
 
 To check the setup before running anything long:
 
@@ -221,13 +219,8 @@ results.
 - Diversity is measured with its own generator, so logging it cannot change a
   run.
 - Library versions are pinned by `uv.lock`, which is what makes the byte-for-byte
-  rebuild dependable. Note that pandas and scipy are not listed in
-  `pyproject.toml`: they arrive as dependencies of other packages, so re-resolving
-  instead of installing from the lock file could change or drop them.
-- We make no changes to the ariel framework (`src/ariel`). It does contain one
-  fix that postdates our first results: upstream commit `3c62f63`, written by
-  the course maintainer and merged here in `4faa361`, repairs `subtree_swap`.
-  Before it, the incoming subtree was copied into the receiving genome but
-  never attached to it, so the unreachable nodes were pruned and crossover only
-  deleted a branch from each parent instead of exchanging material. Results
-  produced before that merge are not comparable with these.
+  rebuild dependable.
+- We make no changes to the ariel framework (`src/ariel`). The one commit that
+  touches it is upstream `3c62f63`, a `subtree_swap` fix written by the course
+  maintainer and merged here in `4faa361`. These results postdate that merge and
+  are not comparable with earlier ones.
