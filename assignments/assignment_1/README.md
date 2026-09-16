@@ -50,7 +50,7 @@ uv run pytest assignments/assignment_1/tests
 | `conditions.py` | Which condition is the baseline, the control, lexicase and random search |
 | `plots.py` | The five figures |
 | `stats.py` | The hypothesis tests and the summary table |
-| `tests/` | 18 tests for the code above |
+| `tests/` | 23 tests for the code above |
 | `lint.toml` | Ruff settings for this folder (see below) |
 
 ## Reproducing the results
