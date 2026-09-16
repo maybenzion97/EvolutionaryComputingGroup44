@@ -220,7 +220,4 @@ results.
   run.
 - Library versions are pinned by `uv.lock`, which is what makes the byte-for-byte
   rebuild dependable.
-- We make no changes to the ariel framework (`src/ariel`). The one commit that
-  touches it is upstream `3c62f63`, a `subtree_swap` fix written by the course
-  maintainer and merged here in `4faa361`. These results postdate that merge and
-  are not comparable with earlier ones.
+- We make no changes to the ariel framework (`src/ariel`).
