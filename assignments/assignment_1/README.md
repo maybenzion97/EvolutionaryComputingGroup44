@@ -64,7 +64,7 @@ K_CONTROL=40 bash assignments/assignment_1/run_all.sh
 uv run python assignments/assignment_1/analysis.py
 ```
 
-The scripts refuse to overwrite existing runs, so delete `results/` and
+The scripts do not overwrite existing runs by default, so delete `results/` and
 `figures/` first, or add `OVERWRITE=1` to step 2:
 
 ```bash
@@ -123,8 +123,6 @@ figures/
 | `summary.csv` | Final-generation mean and std per condition. Two header rows: the metric, then `mean`/`std` | yes |
 | `stats.csv` | One row per hypothesis test (see the columns below) | yes |
 
-Also not in git: `__data__/` (output of the course template), `results/_debug/`
-(test runs), and the `__pycache__/` and `.ruff_cache/` folders.
 
 ### Columns of `history.csv`
 
@@ -148,12 +146,6 @@ their means and standard deviations, the Mann-Whitney `U` and `p`,
 beats a run of `b`; 0.5 means no difference) and `p_holm` (`p` corrected within
 each hypothesis).
 
-## Linting and formatting
-
-The repository's own ruff settings skip `assignments/`, so this folder has its
-own `lint.toml`. It is deliberately not called `ruff.toml`: the pre-commit hooks
-would then find it and rewrite the folder. The course files are excluded, and
-editors do not pick this file up automatically.
 
 ```bash
 uv run ruff check --no-fix --config assignments/assignment_1/lint.toml assignments/assignment_1
@@ -174,20 +166,13 @@ results.
   operators stay at standard settings and are identical in every condition.
 - **One mutation per child, chosen uniformly from ariel's four tree
   mutations.** Every child differs from its parents even when crossover is
-  skipped (30% of the time), and no single operator is favoured. In an earlier
-  pilot (3 seeds, a different survivor scheme), adding a mutation that grows
-  bodies gave the same final fitness (12.23 vs 12.25), which suggests the exact
-  mix matters little.
+  skipped (30% of the time), and no single operator is favoured.
 - **Subtree replacement adds a branch of 1 to 3 modules.** This is ariel's
   built-in limit (the code passes `max_modules=3`, which matches it). Small
   branches keep the mutation a local change and rarely push a body over the size
   limit.
 - **Tournament without replacement.** A tournament of size k compares k
   different bodies. Sizes below 1 or above the population size are rejected.
-- **Generational survivors with one elite.** In a pilot, (μ + λ) survivor
-  selection on the combined score hid most of the difference between the
-  selection schemes, so parent selection is kept as the main source of
-  selection pressure.
 - **Initial bodies get 1 to 20 modules.** `random_tree(20)` always builds full
   21-node bodies, which would make random search an unfairly weak baseline.
 - **Calibrating the control.** `calibrate_k.py` lets lexicase and tournaments of
@@ -200,14 +185,7 @@ results.
   generation.
 - **Diversity is estimated** from 20 randomly chosen bodies (190 pairs) to keep
   runs fast.
-- **The 25-node target cannot be matched exactly.** Bodies have at most 21
-  nodes, so their distance to it is at least 4. No run came close to that
-  limit: the closest any body got was 6.0 (lexicase), 10.5 (k = 2) and 11.5
-  (k = 40).
-- **Oversized children are discarded, but this almost never happens.** Only 0
-  to 2 of the 1,000 generations per condition discarded any child, and the
-  largest best body had 17 nodes, so the size limit adds no real pressure
-  towards small bodies.
+
 
 ## Reproducibility notes
 

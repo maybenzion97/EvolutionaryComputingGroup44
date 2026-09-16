@@ -13,7 +13,7 @@ class Condition:
     name: str
     role: str  # one of ROLE_ORDER
     label: str
-    short_label: str  # two lines, for the box plot
+    short_label: str
     color: str
     marker: str
 
