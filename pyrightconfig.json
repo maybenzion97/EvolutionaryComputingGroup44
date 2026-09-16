@@ -17,6 +17,12 @@
     "reportUnknownArgumentType": false, // + PIL
     // -------------------------------------------------------------------- //
     "reportUnknownLambdaType": false,
+    // Course files for assignment 1: we are not allowed to change them, so
+    // their type errors (nx.DiGraph without type arguments) are not ours to fix.
+    "ignore": [
+        "assignments/assignment_1/tree_edit_distance.py",
+        "assignments/assignment_1/A1_template_2026.py"
+    ],
     // Assignment 1: the scripts import each other as top-level modules (e.g.
     // `from problem import ...`), and pandas/scipy have no type stubs.
     "executionEnvironments": [
