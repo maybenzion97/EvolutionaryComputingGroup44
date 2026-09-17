@@ -50,7 +50,7 @@ def find_conditions(data: pd.DataFrame, control: str | None) -> list[Condition]:
             condition = Condition(
                 name,
                 "baseline",
-                "Tournament (k = 2)",
+                "Tournament $k$ = 2",
                 "Tournament\nk = 2",
                 "#2a78d6",
                 "o",
@@ -60,7 +60,7 @@ def find_conditions(data: pd.DataFrame, control: str | None) -> list[Condition]:
             condition = Condition(
                 name,
                 "control",
-                f"Tournament (k = {k}, matched)",
+                f"Tournament $k$ = {k}",
                 f"Tournament\nk = {k}",
                 "#1baf7a",
                 "^",
