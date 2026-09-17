@@ -7,7 +7,8 @@ Reads results/<condition>/seed_XX/ and writes to figures/:
   closest_per_target   the closest body to each target at the end of the run
   final_fitness        final best fitness, one dot per seed
   summary.csv          final-generation mean and std per condition
-  stats.csv            Mann-Whitney U tests (Holm-corrected) and A12 effect sizes
+  stats.csv            Wilcoxon signed-rank tests on seed-matched pairs
+                       (Holm-corrected), with paired differences and A12
 
 Usage (from the repository root):
     uv run python assignments/assignment_1/analysis.py

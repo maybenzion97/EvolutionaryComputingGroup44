@@ -24,7 +24,7 @@ HISTORY_COLUMNS = [
     "best_size",
     "mean_size",
     "diversity",
-    "distinct_parents",  # different bodies among the first pop_size parent picks
+    "distinct_parents",  # distinct individuals among the first pop_size picks
     "parent_picks",  # all parent picks, including those for discarded children
     *[f"closest_{size}" for size in TARGET_SIZES],
     *[f"best_dist_{size}" for size in TARGET_SIZES],
