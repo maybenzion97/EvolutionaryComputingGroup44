@@ -25,12 +25,6 @@ Every row of `stats.csv` carries one of these labels.
 | `H3 combined fitness` | lexicase against each tournament, on best fitness |
 | `H4 control diversity` | the two tournaments against each other, on diversity at the last generation |
 
-The report's H4 asks whether matching the number of distinct parents is enough
-to reproduce lexicase's diversity and coverage. It is answered from the
-lexicase-versus-k = 40 rows of `H1` and `H2`, not from the `H4 control
-diversity` row, which is the separate check that the larger tournament is the
-less diverse of the two.
-
 Run all commands from the **repository root**.
 
 ## Setup
