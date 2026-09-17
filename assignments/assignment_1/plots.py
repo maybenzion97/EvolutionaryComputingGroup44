@@ -13,12 +13,6 @@ from problem import TARGET_SIZES
 
 COLUMN_WIDTH = 3.33
 
-# The report places the two curve figures side by side across both columns, so
-# each is drawn at roughly two thirds of the width it is generated at. Text is
-# scaled down with everything else, so the sizes below are set larger than the
-# printed result: divide by DISPLAY_SCALE to see what the reader gets.
-DISPLAY_SCALE = 0.67
-
 
 def set_plot_style() -> None:
     plt.switch_backend("Agg")  # files only, no window
@@ -54,14 +48,7 @@ def save(fig: Figure, figures: Path, name: str) -> None:
 
 
 def legend_inside(ax: Axes) -> None:
-    """Legend within the axes, so the saved figure keeps the width asked for.
-
-    A legend above the axes is wider than the plot itself, and the tight
-    bounding box then grows the whole figure to fit it. The report scales these
-    curves down to share a row, so a wider figure means smaller printed text.
-    Room is made above the curves first, and the legend is given a background,
-    so that it never sits on top of a line.
-    """
+    """Legend within the axes, so the saved figure keeps the width asked for."""
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom, bottom + (top - bottom) * 1.42)
     ax.legend(
