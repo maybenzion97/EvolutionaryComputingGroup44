@@ -18,22 +18,22 @@ def set_plot_style() -> None:
     plt.switch_backend("Agg")  # files only, no window
     plt.rcParams.update(
         {
-            "font.size": 11,
-            "legend.fontsize": 9,
-            "xtick.labelsize": 9,
-            "ytick.labelsize": 9,
+            "font.size": 8,
+            "legend.fontsize": 7,
+            "xtick.labelsize": 7,
+            "ytick.labelsize": 7,
             "axes.labelcolor": "0.3",
             "xtick.color": "0.45",
             "ytick.color": "0.45",
             "axes.edgecolor": "0.75",
-            "axes.linewidth": 1.0,
+            "axes.linewidth": 0.75,
             "axes.spines.top": False,
             "axes.spines.right": False,
             "axes.grid": True,
             "axes.grid.axis": "y",
             "grid.color": "0.9",
-            "grid.linewidth": 0.7,
-            "lines.linewidth": 2.0,
+            "grid.linewidth": 0.5,
+            "lines.linewidth": 1.5,
             "legend.frameon": False,
             "savefig.bbox": "tight",
             "pdf.fonttype": 42,
@@ -43,7 +43,8 @@ def set_plot_style() -> None:
 
 def save(fig: Figure, figures: Path, name: str) -> None:
     fig.savefig(figures / f"{name}.pdf")
-    fig.savefig(figures / f"{name}.png", dpi=200)
+    # 400 dpi keeps the raster copies sharp when printed at figure width
+    fig.savefig(figures / f"{name}.png", dpi=400)
     plt.close(fig)
 
 
@@ -99,7 +100,7 @@ def plot_mean_and_std(
 def plot_fitness_curve(
     data: pd.DataFrame, conditions: list[Condition], figures: Path
 ) -> None:
-    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.0))
+    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 1.8))
     # random search logs each batch of pop_size bodies as one generation
     plot_mean_and_std(ax, data, "generation", "best_fitness", conditions)
     ax.set_xlabel("generation")
@@ -117,7 +118,7 @@ def plot_per_generation(
     figures: Path,
 ) -> None:
     eas = [c for c in conditions if c.role != "random"]
-    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.0))
+    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 1.8))
     plot_mean_and_std(ax, data.dropna(subset=[column]), "generation", column, eas)
     ax.set_xlabel("generation")
     ax.set_ylabel(ylabel)
