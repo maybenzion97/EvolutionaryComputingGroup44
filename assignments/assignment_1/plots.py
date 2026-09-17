@@ -18,22 +18,22 @@ def set_plot_style() -> None:
     plt.switch_backend("Agg")  # files only, no window
     plt.rcParams.update(
         {
-            "font.size": 8,
-            "legend.fontsize": 7,
-            "xtick.labelsize": 7,
-            "ytick.labelsize": 7,
+            "font.size": 11,
+            "legend.fontsize": 9,
+            "xtick.labelsize": 9,
+            "ytick.labelsize": 9,
             "axes.labelcolor": "0.3",
             "xtick.color": "0.45",
             "ytick.color": "0.45",
             "axes.edgecolor": "0.75",
-            "axes.linewidth": 0.75,
+            "axes.linewidth": 1.0,
             "axes.spines.top": False,
             "axes.spines.right": False,
             "axes.grid": True,
             "axes.grid.axis": "y",
             "grid.color": "0.9",
-            "grid.linewidth": 0.5,
-            "lines.linewidth": 1.5,
+            "grid.linewidth": 0.7,
+            "lines.linewidth": 2.0,
             "legend.frameon": False,
             "savefig.bbox": "tight",
             "pdf.fonttype": 42,
@@ -45,6 +45,24 @@ def save(fig: Figure, figures: Path, name: str) -> None:
     fig.savefig(figures / f"{name}.pdf")
     fig.savefig(figures / f"{name}.png", dpi=200)
     plt.close(fig)
+
+
+def legend_inside(ax: Axes) -> None:
+    """Legend within the axes, so the saved figure keeps the width asked for."""
+    bottom, top = ax.get_ylim()
+    ax.set_ylim(bottom, bottom + (top - bottom) * 1.42)
+    ax.legend(
+        loc="upper center",
+        ncol=2,
+        handlelength=1.3,
+        labelspacing=0.25,
+        columnspacing=1.0,
+        borderpad=0.3,
+        frameon=True,
+        framealpha=0.9,
+        edgecolor="none",
+        facecolor="white",
+    )
 
 
 def legend_above(ax: Axes) -> None:
@@ -81,12 +99,12 @@ def plot_mean_and_std(
 def plot_fitness_curve(
     data: pd.DataFrame, conditions: list[Condition], figures: Path
 ) -> None:
-    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.3))
+    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.0))
     # random search logs each batch of pop_size bodies as one generation
     plot_mean_and_std(ax, data, "generation", "best_fitness", conditions)
     ax.set_xlabel("generation")
     ax.set_ylabel("best fitness")
-    legend_above(ax)
+    legend_inside(ax)
     save(fig, figures, "fitness_curve")
 
 
@@ -99,12 +117,12 @@ def plot_per_generation(
     figures: Path,
 ) -> None:
     eas = [c for c in conditions if c.role != "random"]
-    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.1))
+    fig, ax = plt.subplots(figsize=(COLUMN_WIDTH, 2.0))
     plot_mean_and_std(ax, data.dropna(subset=[column]), "generation", column, eas)
     ax.set_xlabel("generation")
     ax.set_ylabel(ylabel)
     ax.set_ylim(bottom=0)
-    legend_above(ax)
+    legend_inside(ax)
     save(fig, figures, name)
 
 
