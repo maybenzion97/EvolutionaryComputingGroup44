@@ -175,7 +175,7 @@ figures/
 ### Columns of `stats.csv`
 
 `hypothesis`, `metric`, the two conditions `a` and `b`, `n_pairs` (seeds both
-conditions ran), their means and standard deviations, `mean_diff` (`a` minus `b`
+conditions ran), `mean_a`, `std_a`, `mean_b` and `std_b`, `mean_diff` (`a` minus `b`
 in the metric's own units), `a_better_in` (how many of the pairs `a` won), the
 Wilcoxon `W` and `p`, `lower_is_better` for the metric, `a12_a_better` (the
 chance that a run of `a` beats a run of `b`; 0.5 means no difference) and
@@ -226,7 +226,7 @@ results.
   nine sizes tried. The final runs confirm the match on each condition's own
   populations: 7.38 for lexicase and 8.66 for k = 40 (`summary.csv`).
 - **Lexicase with five targets is very selective.** It usually ends at the best
-  body for one target, so only about 7 different bodies reproduce per
+  body for one target, so only about 7 different individuals reproduce per
   generation.
 - **Diversity is estimated** from 20 randomly chosen bodies (190 pairs) to keep
   runs fast.
