@@ -1,15 +1,35 @@
 # Assignment 1: lexicase vs tournament parent selection
 
-**Research question.** When one robot body has to match five target bodies of
-different sizes, does selecting parents one target at a time (lexicase) instead
-of on the combined mean + std score (tournament) change what the EA finds, in
-terms of population diversity and bodies that are close to single targets? And
-does that help or hurt the combined fitness?
+**Research question.** Can lexicase selection retain greater structural
+diversity over evolution and closer final target coverage than tournament
+selection at different tournament sizes, without worsening the best
+individual's aggregate fitness?
 
-Only parent selection differs between the conditions. Everything else is the
-same: tree encoding, at most 20 modules, population 100, 100 generations
-(10,100 evaluations), subtree crossover (p = 0.7), one random tree mutation per
-child, and generational replacement that keeps the best parent.
+Lexicase picks parents one target at a time; tournament picks them on the
+combined mean + std score. Only parent selection differs between the
+conditions. Everything else is the same: tree encoding, at most 20 modules,
+population 100, 100 generations (10,100 evaluations), subtree crossover
+(p = 0.7), one random tree mutation per child, and generational replacement
+that keeps the best parent.
+
+### Hypotheses
+
+Every row of `stats.csv` carries one of these labels.
+
+| Label in `stats.csv` | What it compares |
+|---|---|
+| `H0 EA vs random` | each EA against random search, on best fitness |
+| `H1 diversity` | lexicase against each tournament, on diversity at the last generation |
+| `H1b diversity over run` | the same contrast, on each run's average diversity over generations 1--100 |
+| `H2 specialists` | lexicase against each tournament, on the coverage of each of the five targets |
+| `H3 combined fitness` | lexicase against each tournament, on best fitness |
+| `H4 control diversity` | the two tournaments against each other, on diversity at the last generation |
+
+The report's H4 asks whether matching the number of distinct parents is enough
+to reproduce lexicase's diversity and coverage. It is answered from the
+lexicase-versus-k = 40 rows of `H1` and `H2`, not from the `H4 control
+diversity` row, which is the separate check that the larger tournament is the
+less diverse of the two.
 
 Run all commands from the **repository root**.
 
