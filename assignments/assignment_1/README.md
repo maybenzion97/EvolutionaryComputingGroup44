@@ -167,7 +167,7 @@ figures/
 | `best_fitness`, `mean_fitness`, `std_fitness` | Fitness = mean + std of the edit distances to the 5 targets (lower is better). For random search, `best_fitness` is the best found so far and the other two describe the current batch |
 | `best_size`, `mean_size` | Number of nodes in a body, including the core |
 | `diversity` | Mean edit distance between 20 randomly chosen bodies |
-| `distinct_parents` | Different bodies among the first `pop_size` parent picks (fewer = stronger selection). Empty for generation 0 and for random search |
+| `distinct_parents` | Distinct individuals among the first `pop_size` parent picks (fewer = stronger selection). Two identical bodies count separately. Empty for generation 0 and for random search, neither of which has parents |
 | `parent_picks` | All parent picks in the generation; above `pop_size` when children were too big and discarded |
 | `closest_7` to `closest_25` | Smallest distance of any body in the population to that target |
 | `best_dist_7` to `best_dist_25` | Distance of the best body to each target |
@@ -217,7 +217,7 @@ results.
   limit. Small branches keep the mutation local and rarely push a body over the
   size limit.
 - **Tournament without replacement.** A tournament of size k compares k
-  different bodies. Sizes below 1 or above the population size are rejected.
+  distinct individuals. Sizes below 1 or above the population size are rejected.
 - **Initial bodies get 1 to 20 modules.** `random_tree(20)` always builds full
   21-node bodies, which would make random search an unfairly weak baseline.
 - **Calibrating the control.** `calibrate_k.py` lets lexicase and tournaments of
